@@ -24,10 +24,15 @@
 #define MAXPRESSURE 1000
 
 //These are the pins for the shield!
-#define YP A1
-#define XM A2
-#define YM 7
-#define XP 6
+//#define YP A1
+//#define XM A2
+//#define YM 7
+//#define XP 6
+
+#define YP A2
+#define XM A3
+#define YM 8
+#define XP 9
 
 /*
 //Macros replaced by variables
@@ -36,10 +41,10 @@
 #define TS_MAXX 920
 #define TS_MAXY 940
 */
-short TS_MINX=150;
-short TS_MINY=120;
-short TS_MAXX=920;
-short TS_MAXY=940;
+short TS_MINX=122;
+short TS_MINY=927;
+short TS_MAXX=988;
+short TS_MAXY=92;
 
 // Init TouchScreen:
 
@@ -89,7 +94,7 @@ void setup(void) {
 
   // Serial por for debug, not works if shield is plugged in arduino
 
-//  Serial.begin(9600);
+  Serial.begin(9600);
 
   // Inicialize the controller
 
@@ -104,11 +109,11 @@ void setup(void) {
 
   // Debug
 
-//  Serial.println(F("TFT LCD test"));
-//  Serial.print("TFT size is ");
-//  Serial.print(tft.width());
-//  Serial.print("x");
-//  Serial.println(tft.height());
+  Serial.println(F("TFT LCD test"));
+  Serial.print("TFT size is ");
+  Serial.print(tft.width());
+  Serial.print("x");
+  Serial.println(tft.height());
 
   // UI
 
@@ -310,12 +315,15 @@ void calibrate_TS(void) {
 // wait 1 touch to return the point
 
 TSPoint waitOneTouch() {
+  Serial.println("Waiting to be touched");
 
   TSPoint p;
 
   do {
     p = getTSPoint();
-  } while(p.z == 0);
+
+    } 
+  while(p.z == 0);
 
   return p;
 }
@@ -329,14 +337,15 @@ TSPoint getTSPoint() {
   TSPoint p;
 
   // Get a TSPoint
-
+  
   p = ts.getPoint();
 
   pinMode(XM, OUTPUT); //Pins configures again for TFT control
   pinMode(YP, OUTPUT);
 
   // Have a touch ?
-
+    Serial.print("Got x = ");Serial.print(p.x);Serial.print(" y = ");Serial.print(p.y);Serial.print(" z = ");Serial.print(p.z);
+    Serial.println();
   if (p.z == 0 || (p.z < MINPRESSURE ) || (p.z > MAXPRESSURE)) {
 
     // Does not, put all to zeros -> not valid point
@@ -357,12 +366,12 @@ TSPoint getTSPoint() {
     tft.print (" vy=");
     tft.print (p.y);
 
-    if (tft.getRotation() == 1) { // Paisagem
-        uint16_t x_val = p.y;
-        uint16_t y_val = p.x; //(p.x < TS_MAXX)?(TS_MAXX - p.x):0;
-        p.x = x_val;
-        p.y = y_val;
-    }
+    //if (tft.getRotation() == 1) { // Paisagem
+    //    uint16_t x_val = p.y;
+     //   uint16_t y_val = p.x; //(p.x < TS_MAXX)?(TS_MAXX - p.x):0;
+    //    p.x = x_val;
+     //   p.y = y_val;
+   // }
     return p;
   }
 }
@@ -373,27 +382,27 @@ TSPoint mapXY (TSPoint p) {
   // Have a touch, so calculate the coordinates of this  // TODO: Another rotations
 
   uint16_t x = 0;
-  if (tft.getRotation() == 1) { // Paisagem
-      x = map(p.x, TS_MINY, TS_MAXY, 0, tft.width());
+  //if (tft.getRotation() == 1) { // Paisagem
+  //    x = map(p.x, TS_MINY, TS_MAXY, 0, tft.width());
       // Ajust
       //x+=10;
       /*if (x > tft.width())
         x = tft.width();*/
-  } else { // Retrato
+  //} else { // Retrato
       x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width());
-  }
+ // }
 
   uint16_t y = 0;
-  if (tft.getRotation() == 1) { // Paisagem
-      y = (tft.height() - map(p.y, TS_MINX, TS_MAXX, 0, tft.height()));
+  //if (tft.getRotation() == 1) { // Paisagem
+      y = (tft.height() - map(p.y, TS_MINY, TS_MAXY, 0, tft.height()));
       /*// Ajust
       float ajust = y * 0.125f;
       y+=ajust;
       if (y > tft.height())
         y=tft.height();*/
-  } else { // Retrato
-      y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
-  }
+ // } else { // Retrato
+  //    y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
+  //}
 
   apagarTexto (0,200,2, 25, YELLOW);
   tft.setCursor (0, 200);
