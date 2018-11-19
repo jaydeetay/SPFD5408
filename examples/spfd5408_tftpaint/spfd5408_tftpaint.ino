@@ -1,3 +1,10 @@
+#include <SPFD5408_TouchScreen.h>
+#include <pin_magic.h>
+#include <SPFD5408_Util.h>
+#include <SPFD5408_Adafruit_GFX.h>
+#include <SPFD5408_Adafruit_TFTLCD.h>
+#include <registers.h>
+
 // Paint example specifically for the TFTLCD breakout board.
 // If using the Arduino shield, use the tftpaint_shield.pde sketch instead!
 // DOES NOT CURRENTLY WORK ON ARDUINO LEONARDO
@@ -49,10 +56,10 @@
 //   D6 connects to digital pin 39
 //   D7 connects to digital pin 40
 
-#define YP A1  // must be an analog pin, use "An" notation!
-#define XM A2  // must be an analog pin, use "An" notation!
-#define YM 7   // can be a digital pin
-#define XP 6   // can be a digital pin
+#define YP A2
+#define XM A3
+#define YM 8
+#define XP 9
 
 // Original values
 //#define TS_MINX 150
@@ -62,9 +69,9 @@
 
 // Calibrate values
 #define TS_MINX 125
-#define TS_MINY 85
+#define TS_MINY 927
 #define TS_MAXX 965
-#define TS_MAXY 905
+#define TS_MAXY 92
 
 // For better pressure precision, we need to know the resistance
 // between X+ and X- Use any multimeter to read it
@@ -79,10 +86,10 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define LCD_RESET A4
 
 // Assign human-readable names to some common 16-bit color values:
-#define	BLACK   0x0000
-#define	BLUE    0x001F
-#define	RED     0xF800
-#define	GREEN   0x07E0
+#define  BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
 #define CYAN    0x07FF
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
@@ -92,7 +99,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 #define BOXSIZE 40
-#define PENRADIUS 3
+#define PENRADIUS 5
 int oldcolor, currentcolor;
 
 void setup(void) {
@@ -130,7 +137,7 @@ void setup(void) {
 
   tft.begin(0x9341); // SDFP5408
 
-  tft.setRotation(0); // Need for the Mega, please changed for your choice or rotation initial
+  tft.setRotation(1); // Need for the Mega, please changed for your choice or rotation initial
 
   // Border
 
@@ -172,7 +179,7 @@ void setup(void) {
   tft.fillRect(BOXSIZE*3, 0, BOXSIZE, BOXSIZE, CYAN);
   tft.fillRect(BOXSIZE*4, 0, BOXSIZE, BOXSIZE, BLUE);
   tft.fillRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, MAGENTA);
-  // tft.fillRect(BOXSIZE*6, 0, BOXSIZE, BOXSIZE, WHITE);
+  tft.fillRect(BOXSIZE*6, 0, BOXSIZE, BOXSIZE, WHITE);
  
   tft.drawRect(0, 0, BOXSIZE, BOXSIZE, WHITE);
   currentcolor = RED;
@@ -205,7 +212,8 @@ void loop()
     Serial.print("\tPressure = "); Serial.println(p.z);
     */
     
-    if (p.y < (TS_MINY-5)) {
+    //if (p.y < (TS_MINY-5)) {
+    if (p.y < (TS_MAXY+5)) {
       Serial.println("erase");
       // press the bottom of the screen to erase 
       tft.fillRect(0, BOXSIZE, tft.width(), tft.height()-BOXSIZE, BLACK);
@@ -217,7 +225,8 @@ void loop()
     //p.x = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
     p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width());
     // *** SPFD5408 change -- End
-    p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());;
+    //p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
+    p.y = (tft.height() - map(p.y, TS_MINY, TS_MAXY, 0, tft.height()));
 
     /*
     Serial.print("("); Serial.print(p.x);
@@ -245,6 +254,9 @@ void loop()
        } else if (p.x < BOXSIZE*6) {
          currentcolor = MAGENTA;
          tft.drawRect(BOXSIZE*5, 0, BOXSIZE, BOXSIZE, WHITE);
+       } else if (p.x < BOXSIZE*7) {
+         currentcolor = WHITE;
+         tft.drawRect(BOXSIZE*6, 0, BOXSIZE, BOXSIZE, WHITE);
        }
 
        if (oldcolor != currentcolor) {
@@ -294,5 +306,3 @@ void drawBorder () {
   tft.fillRect(border, border, (width - border * 2), (height - border * 2), WHITE);
   
 }
-
-
