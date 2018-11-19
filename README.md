@@ -1,3 +1,11 @@
+# Forked from Joao Lopes' library
+
+...in order to work with some cheap Chinese TFTs such as this one from Wish:
+
+https://www.wish.com/product/57c85a223042c8396128c206
+
+
+
 # SPFD5408 Library
 	Author: Joao Lopes
 	Versions:
